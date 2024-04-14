@@ -26,11 +26,11 @@ def get_file_count(folder_path):
 def save_img(img, index):
     if index == 1: # consider normal image
         count = get_file_count(normal_path)
-        fname = "img_"+str(count)+".jpeg"
+        fname = "n_img_"+str(count)+".jpeg"
         cv2.imwrite(normal_path+fname, img)
     else:
         count = get_file_count(defective_path)
-        fname = "img_"+str(count)+".jpeg"
+        fname = "d_img_"+str(count)+".jpeg"
         cv2.imwrite(defective_path+fname, img)
     print("[INFO].. IMAGE SAVED ..")
 
