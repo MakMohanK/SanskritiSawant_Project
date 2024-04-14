@@ -4,6 +4,7 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model
 # from tensorflow.keras.preprocessing import image
 import cv2
+import os 
 
 Weight = "./model/best.pt"
 yolo_model = torch.hub.load('ultralytics/yolov5', 'custom', path=Weight)
@@ -12,6 +13,26 @@ Model = "./model/model.h5"
 defect_model = load_model(Model)
 
 class_names = ['Defective', 'Normal', 'No-OBJ']
+
+normal_path = "./saved_data/normal/"
+defective_path = "./saved_data/defective/"
+
+def get_file_count(folder_path):
+    count = 0
+    for files in os.listdir(folder_path):
+        count += 1
+    return count
+
+def save_img(img, index):
+    if index == 1: # consider normal image
+        count = get_file_count(normal_path)
+        fname = "img_"+str(count)+".jpeg"
+        cv2.imwrite(normal_path+fname, img)
+    else:
+        count = get_file_count(defective_path)
+        fname = "img_"+str(count)+".jpeg"
+        cv2.imwrite(defective_path+fname, img)
+    print("[INFO].. IMAGE SAVED ..")
 
 def detection(img):
     print("[INFO] Detecting object")
@@ -44,12 +65,13 @@ def recognition(boxes, frame):
             print("[OBJECT IS :{0}] & [CONFIDENCE IS :{1}%]".format(class_names[index], int(conf)))
             # print("INDEX:",index, "CONF:",conf)
             cluster.append([index, int(conf)])
+            save_img(frame, index)
         return cluster, frame
     else:
         print("[INFO].. NO OBJECT BOUNDRIES FOUND!")
         return cluster, frame
 
-cam = cv2.VideoCapture(2)
+cam = cv2.VideoCapture(0)
 
 def main():
     while True:
