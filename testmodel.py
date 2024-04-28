@@ -14,7 +14,8 @@ class_names = open("./mk_models/keras_models/labels.txt", "r").readlines()
 data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
 
 
-THR = 40 # ADJUST THE PADDING OVER DETECTION
+THR_L = 140 # ADJUST THE PADDING OVER DETECTION
+THR_H = 35
 
 def do_prediction(img):
     # img = cv2.resize(img, (640, 640))
@@ -24,8 +25,8 @@ def do_prediction(img):
     if bboxes is not None:
         for i, box in bboxes.iterrows():
             x_min, y_min, x_max, y_max = int(box.xmin), int(box.ymin), int(box.xmax), int(box.ymax)
-            img = cv2.rectangle(img, (x_min-35, y_min-20), (x_max+35, y_max+20), (0, 255, 0), 2) # adjusted padding to get the complete object
-            crop_img = img[y_min-THR:y_max+THR, x_min-THR:x_max+THR]
+            crop_img = img[y_min-THR_H:y_max+THR_H, x_min-THR_L:x_max+THR_L]
+            img = cv2.rectangle(img, (x_min-THR_L, y_min-THR_H), (x_max+THR_L, y_max+THR_H), (0, 255, 0), 2) # adjusted padding to get the complete object
             # image = Image.open(crop_img).convert("RGB")
             image  = cv2.cvtColor(crop_img, cv2.COLOR_BGR2RGB)
             image = Image.fromarray(image)
@@ -47,7 +48,7 @@ def do_prediction(img):
 
 
 
-cap = cv2.VideoCapture("./videos/normal2.mp4")
+cap = cv2.VideoCapture("./videos/normal/normal4.mp4")
 
 def main():
     if not cap.isOpened():

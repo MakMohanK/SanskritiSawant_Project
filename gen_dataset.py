@@ -26,16 +26,17 @@ def get_file_count(folder_path):
         count += 1
     return count
 
-def save_img(img, index):
-    if index == 1: # consider normal image
-        count = get_file_count(normal_path)
-        fname = "n_img_"+str(count)+".jpeg"
-        cv2.imwrite(normal_path+fname, img)
-    else:
-        count = get_file_count(defective_path)
-        fname = "d_img_"+str(count)+".jpeg"
-        cv2.imwrite(defective_path+fname, img)
-    print("[INFO].. IMAGE SAVED ..")
+def save_img(img, index): # this function saves data after prediction frame by frame
+    # if index == 1: # consider normal image
+    #     count = get_file_count(normal_path)
+    #     fname = "n_img_"+str(count)+".jpeg"
+    #     cv2.imwrite(normal_path+fname, img)
+    # else:
+    #     count = get_file_count(defective_path)
+    #     fname = "d_img_"+str(count)+".jpeg"
+    #     cv2.imwrite(defective_path+fname, img)
+    # print("[INFO].. IMAGE SAVED ..")
+    pass
 
 def detection(img):
     print("[INFO] Detecting object")
@@ -48,10 +49,13 @@ def detection(img):
         return None, img
 
 
-def save_img_as_dataset(img, folder_path):
-    img_count = get_file_count(folder_path)
-    location = folder_path+"img_d_"+str(img_count)+".jpeg"
-    cv2.imwrite(location, img)
+def save_img_as_dataset(img, folder_path): # this function is creating dataset 
+    try:
+        img_count = get_file_count(folder_path)
+        location = folder_path+"img_d_"+str(img_count)+".jpeg"
+        cv2.imwrite(location, img)
+    except:
+        pass
 
 
 def recognition(boxes, frame):
@@ -60,10 +64,10 @@ def recognition(boxes, frame):
     if boxes is not None:
         for i, box in boxes.iterrows():
             x_min, y_min, x_max, y_max = int(box.xmin), int(box.ymin), int(box.xmax), int(box.ymax)
-            frame = cv2.rectangle(frame, (x_min-35, y_min-20), (x_max+35, y_max+20), (0, 255, 0), 2) # adjusted padding to get the complete object
             # print(i, x_min, y_min, x_max, y_max )
-            crop_img = frame[y_min:y_max, x_min:x_max]
-            save_img_as_dataset(crop_img, def_path) # This line save crop image to train the <model_name>.h5 model
+            crop_img = frame[y_min:y_max+35, x_min-115:x_max+135]
+            frame = cv2.rectangle(frame, (x_min-115, y_min), (x_max+135, y_max+35), (0, 255, 0), 2) # adjusted padding to get the complete object
+            save_img_as_dataset(crop_img, nor_path) # This line save crop image to train the <model_name>.h5 model
             crop_img = cv2.cvtColor(crop_img, cv2.COLOR_RGB2BGR)
             crop_img = cv2.resize(crop_img, (640, 640))
             crop_img = np.expand_dims(crop_img, axis=0)
@@ -84,7 +88,7 @@ def recognition(boxes, frame):
 
 # cam = cv2.VideoCapture(0)  # 0 for laptop camera, 2 for external camera, video path for video read from local storage.
 
-cam = cv2.VideoCapture("./videos/defective2.mp4")
+cam = cv2.VideoCapture("./videos/normal/normal5.mp4")
 
 def main():
     while True:
